@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>继承</title>
+</head>
+
+<body>
+    <script type="text/javascript">
+    //类的声明
+    function M() {
+        this.name = 'name';
+    }
+
+    class N{
+    	constructor(){
+    		this.type = "N";
+    	}
+    }
+    //生成实例
+    console.log(new M,new N);
+
+//实现继承：原型链
+    
+    //1.借助构造函数  缺点：只能部分继承
+    function Parent1(){
+    	this.name = 'Parent1';
+    }
+    Parent1.prototype.say = function(){};
+    function Child1(){
+    	Parent1.call(this);//apply也可
+    	this.type = "child1";
+    }
+    var ex1 = new Child1();
+    console.log(ex1);//有name属性
+    //console.log(ex1.say());//控制台会报错！！！  继承不了Parent1.prototype的say方法
+
+    //2.借助原型链
+    function Parent2(){
+    	this.name = 'Parent2';
+    	this.arr = [1,2,3];
+    }
+    // Parent2.prototype.say = function(){};
+    function Child2(){
+    	
+    	this.type = "child2";
+    }
+    Child2.prototype = new Parent2();
+    console.log(new Child2());//new Child2().__proto__===Child2.prototype 
+
+    var ex2 = new Child2();
+    var ex3 = new Child2();//ex2、ex3共用原型对象 ex2.__proto__===ex3.__proto__
+    ex2.arr.push(4);//ex3.arr也会被更改!!!
+
+    //组合继承1
+     function Parent3(){
+    	this.name = 'Parent3';
+    	this.arr = [1,2,3];
+    }
+    function Child3(){
+    	Parent3.call(this); //借助构造函数的优点  
+    	this.type = "child3";
+    }
+    Child3.prototype = new Parent3();//Parent3得执行两次  prototype直接拿的Parent3的实例 Child3没有自己的constructor 是从实例中继承的 是Parent3（Parent3的constructor是Parent3自己
+    var ex4 = new Child3();  //ex4.constructor===Parent3;!!!
+    var ex5 = new Child3();
+    ex4.arr.push(4);
+    console.log(ex4.arr,ex5.arr);//ex4对arr的更改影响不到ex5.arr 
+    
+    //组合继承优化
+    function Parent4(){
+    	this.name = 'Parent4';
+    	this.arr = [1,2,3];
+    }
+    function Child4(){
+    	Parent4.call(this);  
+    	this.type = "child4";
+    }
+    Child4.prototype = Parent4.prototype;//只是引用    不用new Parent3(),因为若用得执行两次  既拿到了父类的属性方法(Parent3.call(this))又继承了父类的原型对象的属性方法(Child3.prototype = Parent3.prototype)
+    //Parent4.prototype.constructor===Parent4
+    var ex6 = new Child4();
+    var ex7 = new Child4();
+    ex6.arr.push(4);
+    console.log(ex6.arr,ex7.arr);
+
+    console.log(ex6 instanceof Child4,ex7 instanceof Child4);
+    console.log(ex6.constructor);//问题：是Parent4，不是Child4 ！！！
+    
+    //组合优化2
+     function Parent5(){
+    	this.name = 'Parent5';
+    	this.arr = [1,2,3];
+    }
+    function Child5(){
+    	Parent5.call(this);  
+    	this.type = "child5";
+    }
+    Child5.prototype = Object.create(Parent5.prototype);//创建一个中间对象  Child5.prototype.__proto__ = Parent5.prototype
+    Child5.prototype.constructor = Child5;//重置constructor
+    var ex8 = new Child5();
+    var ex9 = new Child5();
+    ex6.arr.push(4);
+    console.log(ex8.arr,ex9.arr);
+
+    console.log(ex8 instanceof Child5,ex9 instanceof Child5);
+    console.log(ex8.constructor);
+    </script>
+</body>
+
+</html>
